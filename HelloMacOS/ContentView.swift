@@ -2,6 +2,9 @@ import AppKit
 import AVFoundation
 import SwiftUI
 
+private let windowWidth: CGFloat = 340
+private let windowHeight: CGFloat = 520
+
 struct ContentView: View {
     @State private var stage: ScreenStage = .welcome
     @State private var activeTrackID: UUID?
@@ -28,7 +31,7 @@ struct ContentView: View {
                 .transition(.opacity.combined(with: .scale(scale: 0.985)))
             }
         }
-        .frame(width: stage.windowWidth, height: windowHeight)
+        .frame(width: windowWidth, height: windowHeight)
         .onChange(of: stage) { _, newStage in
             if case .welcome = newStage {
                 playback.stop()
@@ -36,17 +39,6 @@ struct ContentView: View {
         }
         .animation(.spring(response: 0.25, dampingFraction: 0.9), value: stage)
         .animation(.spring(response: 0.25, dampingFraction: 0.9), value: tracks.count)
-    }
-
-    private var windowHeight: CGFloat {
-        switch stage {
-        case .welcome:
-            return 520
-        case .library:
-            let rowCount = max(tracks.count, 1)
-            let contentHeight = 84 + 68 + 44 + CGFloat(rowCount) * 68
-            return min(max(contentHeight, 320), 620)
-        }
     }
 
     private func importFolder() {
@@ -76,15 +68,6 @@ struct ContentView: View {
 private enum ScreenStage: Equatable {
     case welcome
     case library(folder: URL)
-
-    var windowWidth: CGFloat {
-        switch self {
-        case .welcome:
-            return 340
-        case .library:
-            return 420
-        }
-    }
 }
 
 private struct WelcomeScreen: View {
@@ -300,13 +283,13 @@ private struct TrackRow: View {
                 VStack(spacing: 10) {
                     HStack(spacing: 12) {
                         Image(systemName: track.icon)
-                            .font(.system(size: 18, weight: isActive ? .semibold : .medium))
+                            .font(.system(size: 18, weight: .medium))
                             .foregroundStyle(iconColor)
                             .frame(width: 18)
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text(track.title)
-                                .font(.system(size: 14, weight: isActive ? .semibold : .medium))
+                                .font(.system(size: 14, weight: .medium))
                                 .foregroundStyle(Color.ink)
                                 .lineLimit(1)
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -334,22 +317,26 @@ private struct TrackRow: View {
                             .foregroundStyle(Color.subtleInk.opacity(0.32))
                     }
 
-                    if isActive || isPlaying {
-                        GeometryReader { proxy in
-                            ZStack(alignment: .leading) {
-                                Capsule()
-                                    .fill(Color.primaryBlue.opacity(0.12))
+                    Group {
+                        if isActive || isPlaying {
+                            GeometryReader { proxy in
+                                ZStack(alignment: .leading) {
+                                    Capsule()
+                                        .fill(Color.primaryBlue.opacity(0.12))
 
-                                Capsule()
-                                    .fill(Color.primaryBlue)
-                                    .frame(width: max(proxy.size.width * progress, 0))
+                                    Capsule()
+                                        .fill(Color.primaryBlue)
+                                        .frame(width: max(proxy.size.width * progress, 0))
+                                }
                             }
+                        } else {
+                            Color.clear
                         }
-                        .frame(height: 4)
                     }
+                    .frame(height: 4)
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, isActive ? 14 : 15)
+                .padding(.vertical, 14)
                 .background(
                     Rectangle()
                         .fill(isActive ? Color.primaryBlue.opacity(0.08) : Color.clear)
