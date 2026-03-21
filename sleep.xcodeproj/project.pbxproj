@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A00000000000000000000001 /* HelloMacOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000011 /* HelloMacOSApp.swift */; };
+		A00000000000000000000001 /* SleepApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000011 /* SleepApp.swift */; };
 		A00000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000012 /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A0000000000000000000000A /* HelloMacOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloMacOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A00000000000000000000011 /* HelloMacOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelloMacOSApp.swift; sourceTree = "<group>"; };
+		A0000000000000000000000A /* sleep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = sleep.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00000000000000000000011 /* SleepApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepApp.swift; sourceTree = "<group>"; };
 		A00000000000000000000012 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A00000000000000000000013 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -32,25 +32,25 @@
 		A00000000000000000000005 = {
 			isa = PBXGroup;
 			children = (
-				A00000000000000000000006 /* HelloMacOS */,
+				A00000000000000000000006 /* sleep */,
 				A00000000000000000000009 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		A00000000000000000000006 /* HelloMacOS */ = {
+		A00000000000000000000006 /* sleep */ = {
 			isa = PBXGroup;
 			children = (
-				A00000000000000000000011 /* HelloMacOSApp.swift */,
+				A00000000000000000000011 /* SleepApp.swift */,
 				A00000000000000000000012 /* ContentView.swift */,
 				A00000000000000000000013 /* Info.plist */,
 			);
-			path = HelloMacOS;
+			path = sleep;
 			sourceTree = "<group>";
 		};
 		A00000000000000000000009 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A0000000000000000000000A /* HelloMacOS.app */,
+				A0000000000000000000000A /* sleep.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -58,9 +58,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A00000000000000000000003 /* HelloMacOS */ = {
+		A00000000000000000000003 /* sleep */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A00000000000000000000023 /* Build configuration list for PBXNativeTarget "HelloMacOS" */;
+			buildConfigurationList = A00000000000000000000023 /* Build configuration list for PBXNativeTarget "sleep" */;
 			buildPhases = (
 				A00000000000000000000007 /* Sources */,
 				A00000000000000000000004 /* Frameworks */,
@@ -70,9 +70,9 @@
 			);
 			dependencies = (
 			);
-			name = HelloMacOS;
-			productName = HelloMacOS;
-			productReference = A0000000000000000000000A /* HelloMacOS.app */;
+			name = sleep;
+			productName = sleep;
+			productReference = A0000000000000000000000A /* sleep.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -90,7 +90,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A00000000000000000000020 /* Build configuration list for PBXProject "HelloMacOS" */;
+			buildConfigurationList = A00000000000000000000020 /* Build configuration list for PBXProject "sleep" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -103,7 +103,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A00000000000000000000003 /* HelloMacOS */,
+				A00000000000000000000003 /* sleep */,
 			);
 		};
 /* End PBXProject section */
@@ -124,7 +124,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00000000000000000000002 /* ContentView.swift in Sources */,
-				A00000000000000000000001 /* HelloMacOSApp.swift in Sources */,
+				A00000000000000000000001 /* SleepApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -172,13 +172,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = HelloMacOS/Info.plist;
+				INFOPLIST_FILE = sleep/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.codex.HelloMacOS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sleep.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -193,13 +193,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = HelloMacOS/Info.plist;
+				INFOPLIST_FILE = sleep/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.codex.HelloMacOS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sleep.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -209,7 +209,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A00000000000000000000020 /* Build configuration list for PBXProject "HelloMacOS" */ = {
+		A00000000000000000000020 /* Build configuration list for PBXProject "sleep" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A00000000000000000000021 /* Debug */,
@@ -218,7 +218,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A00000000000000000000023 /* Build configuration list for PBXNativeTarget "HelloMacOS" */ = {
+		A00000000000000000000023 /* Build configuration list for PBXNativeTarget "sleep" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A00000000000000000000024 /* Debug */,
