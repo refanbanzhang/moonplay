@@ -7,6 +7,7 @@ struct HelloMacOSApp: App {
             ContentView()
         }
         .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 800, height: 700)
+        .windowResizability(.contentSize)
+        .defaultSize(width: 420, height: 520)
     }
 }
