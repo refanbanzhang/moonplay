@@ -2,9 +2,6 @@ import AppKit
 import AVFoundation
 import SwiftUI
 
-private let windowWidth: CGFloat = 340
-private let windowHeight: CGFloat = 520
-
 struct ContentView: View {
     @State private var stage: ScreenStage = .welcome
     @State private var activeTrackID: UUID?
@@ -31,7 +28,7 @@ struct ContentView: View {
                 .transition(.opacity.combined(with: .scale(scale: 0.985)))
             }
         }
-        .frame(width: windowWidth, height: windowHeight)
+        .frame(width: AppWindow.width, height: AppWindow.height)
         .onChange(of: stage) { _, newStage in
             if case .welcome = newStage {
                 playback.stop()
@@ -311,10 +308,6 @@ private struct TrackRow: View {
                         }
                         .buttonStyle(.plain)
                         .disabled(!track.canPlay)
-
-                        Image(systemName: "ellipsis")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(Color.subtleInk.opacity(0.32))
                     }
 
                     Group {

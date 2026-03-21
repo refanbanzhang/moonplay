@@ -1,5 +1,10 @@
 import SwiftUI
 
+enum AppWindow {
+    static let width: CGFloat = 340
+    static let height: CGFloat = 520
+}
+
 @main
 struct HelloMacOSApp: App {
     var body: some Scene {
@@ -8,6 +13,6 @@ struct HelloMacOSApp: App {
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
-        .defaultSize(width: 340, height: 520)
+        .defaultSize(width: AppWindow.width, height: AppWindow.height)
     }
 }
