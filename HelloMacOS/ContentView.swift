@@ -1,13 +1,11 @@
 import AppKit
 import AVFoundation
-import CoreMedia
 import SwiftUI
 
 struct ContentView: View {
     @State private var stage: ScreenStage = .welcome
     @State private var activeTrackID: UUID?
     @State private var tracks: [AudioAsset] = []
-    @State private var currentFolder: URL?
     @StateObject private var playback = AudioPlaybackController()
 
     var body: some View {
@@ -19,11 +17,11 @@ struct ContentView: View {
             case .welcome:
                 WelcomeScreen(onContinue: importFolder)
                     .transition(.opacity.combined(with: .scale(scale: 0.98)))
-            case .library:
+            case .library(let folder):
                 LibraryScreen(
                     tracks: tracks,
                     activeTrackID: $activeTrackID,
-                    currentFolder: currentFolder,
+                    currentFolder: folder,
                     playback: playback,
                     onImport: importFolder
                 )
@@ -32,7 +30,7 @@ struct ContentView: View {
         }
         .frame(width: stage.windowWidth, height: windowHeight)
         .onChange(of: stage) { _, newStage in
-            if newStage == .welcome {
+            if case .welcome = newStage {
                 playback.stop()
             }
         }
@@ -65,20 +63,19 @@ struct ContentView: View {
 
         let importedTracks = AudioAsset.load(from: selectedURL)
         let nextTracks = importedTracks.isEmpty ? AudioAsset.placeholder(for: selectedURL) : importedTracks
-        currentFolder = selectedURL
         playback.stop()
 
         withAnimation(.spring(response: 0.28, dampingFraction: 0.9)) {
             tracks = nextTracks
             activeTrackID = nextTracks.first(where: \.canPlay)?.id ?? nextTracks.first?.id
-            stage = .library
+            stage = .library(folder: selectedURL)
         }
     }
 }
 
-private enum ScreenStage {
+private enum ScreenStage: Equatable {
     case welcome
-    case library
+    case library(folder: URL)
 
     var windowWidth: CGFloat {
         switch self {
@@ -155,7 +152,7 @@ private struct WelcomeScreen: View {
 private struct LibraryScreen: View {
     let tracks: [AudioAsset]
     @Binding var activeTrackID: UUID?
-    let currentFolder: URL?
+    let currentFolder: URL
     @ObservedObject var playback: AudioPlaybackController
     let onImport: () -> Void
 
@@ -253,9 +250,9 @@ private struct LibraryScreen: View {
 
             Spacer()
 
-            Image(systemName: playback.hasPlayingTracks ? "waveform" : "pause.fill")
+            Image(systemName: footerHasPlayback ? "waveform" : "pause.fill")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(playback.hasPlayingTracks ? Color.primaryBlue : Color.subtleInk.opacity(0.55))
+                .foregroundStyle(footerHasPlayback ? Color.primaryBlue : Color.subtleInk.opacity(0.55))
         }
         .padding(.horizontal, 16)
         .frame(height: 36)
@@ -267,13 +264,13 @@ private struct LibraryScreen: View {
         }
     }
 
+    private var footerHasPlayback: Bool {
+        playback.playingTrackCount > 0
+    }
+
     private var footerSummary: String {
-        let baseSummary: String
-        if let currentFolder {
-            baseSummary = "\(tracks.count) item\(tracks.count == 1 ? "" : "s") in \(currentFolder.lastPathComponent)"
-        } else {
-            baseSummary = "\(tracks.count) item\(tracks.count == 1 ? "" : "s")"
-        }
+        let baseSummary =
+            "\(tracks.count) item\(tracks.count == 1 ? "" : "s") in \(currentFolder.lastPathComponent)"
 
         let playingCount = playback.playingTrackCount
         if playingCount > 0 {
@@ -284,10 +281,6 @@ private struct LibraryScreen: View {
     }
 
     private var breadcrumbParts: [String] {
-        guard let currentFolder else {
-            return ["~", "Project", "2026"]
-        }
-
         let parts = currentFolder.pathComponents.suffix(3).filter { $0 != "/" }
         return ["~"] + parts
     }
@@ -403,10 +396,6 @@ private final class AudioPlaybackController: ObservableObject {
     private var players: [UUID: AVPlayer] = [:]
     private var timeObservers: [UUID: Any] = [:]
     private var endObservers: [UUID: NSObjectProtocol] = [:]
-
-    var hasPlayingTracks: Bool {
-        !playingTrackIDs.isEmpty
-    }
 
     var playingTrackCount: Int {
         playingTrackIDs.count
@@ -528,7 +517,7 @@ private final class AudioPlaybackController: ObservableObject {
     }
 }
 
-private struct AudioAsset: Identifiable, Equatable {
+private struct AudioAsset: Identifiable {
     let id = UUID()
     let title: String
     let metadata: String
