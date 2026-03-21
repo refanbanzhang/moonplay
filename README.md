@@ -34,6 +34,6 @@ xcodebuild -scheme sleep -configuration Release \
 
 ## 代码位置
 
-- `sleep/SleepApp.swift`
-- `sleep/ContentView.swift`
-- `sleep/Info.plist`
+- `SleepApp.swift`
+- `ContentView.swift`
+- `Info.plist`
