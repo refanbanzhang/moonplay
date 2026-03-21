@@ -10,7 +10,7 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            Color.windowBackground
+            Color.surfaceLowest
                 .ignoresSafeArea()
 
             switch stage {
@@ -23,7 +23,8 @@ struct ContentView: View {
                     activeTrackID: $activeTrackID,
                     currentFolder: folder,
                     playback: playback,
-                    onImport: importFolder
+                    onImport: importFolder,
+                    onDeleteTrack: removeTrack
                 )
                 .transition(.opacity.combined(with: .scale(scale: 0.985)))
             }
@@ -60,6 +61,16 @@ struct ContentView: View {
             stage = .library(folder: selectedURL)
         }
     }
+
+    private func removeTrack(_ track: AudioAsset) {
+        playback.stopPlayback(for: track)
+        withAnimation(.spring(response: 0.28, dampingFraction: 0.9)) {
+            tracks.removeAll { $0.id == track.id }
+            if activeTrackID == track.id {
+                activeTrackID = tracks.first?.id
+            }
+        }
+    }
 }
 
 private enum ScreenStage: Equatable {
@@ -75,58 +86,62 @@ private struct WelcomeScreen: View {
             Spacer(minLength: 0)
 
             VStack(spacing: 0) {
-                Image(systemName: "folder.fill")
-                    .font(.system(size: 72, weight: .medium))
-                    .foregroundStyle(Color.primaryBlue)
+                Image(systemName: "folder")
+                    .font(.system(size: 72, weight: .light))
+                    .foregroundStyle(Color.welcomeIcon)
 
-                Spacer().frame(height: 28)
+                Spacer().frame(height: 32)
 
                 Text("AudioDirectory")
-                    .font(.system(size: 24, weight: .bold))
+                    .font(.system(size: 20, weight: .semibold))
+                    .tracking(-0.3)
                     .foregroundStyle(Color.ink)
 
                 Spacer().frame(height: 12)
 
-                Text("Choose a folder containing audio\nfiles to begin.")
-                    .font(.system(size: 14, weight: .medium))
+                Text("Choose a folder containing audio files to begin.")
+                    .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(Color.subtleInk)
                     .multilineTextAlignment(.center)
-                    .lineSpacing(3)
+                    .lineSpacing(2)
+                    .padding(.horizontal, 8)
 
-                Spacer().frame(height: 32)
+                Spacer().frame(height: 40)
 
                 Button(action: onContinue) {
-                    HStack(spacing: 10) {
-                        Text(". /START")
-                            .font(.system(size: 16, weight: .bold))
-
-                        Image(systemName: "play.fill")
-                            .font(.system(size: 11, weight: .bold))
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.primaryBlue, Color.primaryBlueBright],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    )
-                    .shadow(color: Color.ink.opacity(0.12), radius: 18, y: 10)
+                    Text("./START")
+                        .font(.system(size: 14, weight: .medium, design: .monospaced))
+                        .foregroundStyle(Color.startBtnText)
+                        .frame(maxWidth: 280)
+                        .frame(height: 40)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Color.startBtnBg)
+                        )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.welcomeStart)
                 .focusable()
             }
-            .frame(width: 236)
+            .frame(maxWidth: .infinity)
 
             Spacer(minLength: 0)
         }
-        .padding(.vertical, 48)
+        .padding(.horizontal, 32)
+        .padding(.vertical, 40)
     }
+}
+
+private struct WelcomeStartButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.92 : 1)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+private extension ButtonStyle where Self == WelcomeStartButtonStyle {
+    static var welcomeStart: WelcomeStartButtonStyle { WelcomeStartButtonStyle() }
 }
 
 private struct LibraryScreen: View {
@@ -135,6 +150,7 @@ private struct LibraryScreen: View {
     let currentFolder: URL
     @ObservedObject var playback: AudioPlaybackController
     let onImport: () -> Void
+    let onDeleteTrack: (AudioAsset) -> Void
 
     var body: some View {
         VStack(spacing: 0) {
@@ -147,13 +163,15 @@ private struct LibraryScreen: View {
                             track: track,
                             isActive: activeTrackID == track.id,
                             isPlaying: playback.isPlaying(track),
-                            progress: playback.progress(for: track),
                             onSelect: {
                                 activeTrackID = track.id
                             },
                             onTogglePlayback: {
                                 activeTrackID = track.id
                                 playback.togglePlayback(for: track)
+                            },
+                            onDelete: {
+                                onDeleteTrack(track)
                             }
                         )
                     }
@@ -161,210 +179,151 @@ private struct LibraryScreen: View {
                 .padding(.bottom, 8)
             }
             .scrollIndicators(.never)
-
-            footer
         }
         .background(Color.surfaceLowest)
     }
 
     private var header: some View {
-        HStack(spacing: 10) {
-            HStack(spacing: 5) {
-                Image(systemName: "folder.fill")
+        HStack(alignment: .center, spacing: 10) {
+            HStack(spacing: 4) {
+                Text("./")
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Color.subtleInk.opacity(0.7))
+                    .foregroundStyle(Color.subtleInk.opacity(0.4))
 
-                ForEach(Array(breadcrumbParts.enumerated()), id: \.offset) { index, part in
-                    if index > 0 {
-                        Text("/")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(Color.subtleInk.opacity(0.45))
-                    }
+                Text("Audio")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Color.primaryBlue)
 
-                    Text(part)
-                        .font(.system(size: 12, weight: index == breadcrumbParts.count - 1 ? .semibold : .medium))
-                        .foregroundStyle(index == breadcrumbParts.count - 1 ? Color.ink : Color.subtleInk.opacity(0.82))
-                        .lineLimit(1)
-                }
+                Text("./")
+                    .font(.system(size: 13, weight: .light))
+                    .foregroundStyle(Color.subtleInk.opacity(0.3))
+
+                Text(currentFolder.lastPathComponent)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Color.subtleInk.opacity(0.4))
+                    .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
             Button(action: onImport) {
-                HStack(spacing: 6) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 11, weight: .bold))
-                    Text("Import")
-                        .font(.system(size: 12, weight: .semibold))
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 14)
-                .frame(height: 30)
-                .background(
-                    Capsule(style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.primaryBlue, Color.primaryBlueBright],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                )
+                Image(systemName: "plus")
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundStyle(Color.subtleInk)
+                    .frame(width: 24, height: 24)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.libraryAdd)
         }
-        .padding(.horizontal, 16)
-        .frame(height: 60)
-        .background(.ultraThinMaterial)
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 12)
+        .background(Color.surfaceLowest)
         .overlay(alignment: .bottom) {
             Rectangle()
                 .fill(Color.black.opacity(0.04))
                 .frame(height: 0.5)
         }
     }
+}
 
-    private var footer: some View {
-        HStack {
-            Text(footerSummary)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(Color.subtleInk.opacity(0.78))
-
-            Spacer()
-
-            Image(systemName: footerHasPlayback ? "waveform" : "pause.fill")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(footerHasPlayback ? Color.primaryBlue : Color.subtleInk.opacity(0.55))
-        }
-        .padding(.horizontal, 16)
-        .frame(height: 36)
-        .background(Color.surfaceLowest)
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(Color.black.opacity(0.04))
-                .frame(height: 0.5)
-        }
+private struct LibraryAddButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(
+                Circle()
+                    .fill(Color.black.opacity(configuration.isPressed ? 0.08 : 0.04))
+            )
     }
+}
 
-    private var footerHasPlayback: Bool {
-        playback.playingTrackCount > 0
-    }
-
-    private var footerSummary: String {
-        let baseSummary =
-            "\(tracks.count) item\(tracks.count == 1 ? "" : "s") in \(currentFolder.lastPathComponent)"
-
-        let playingCount = playback.playingTrackCount
-        if playingCount > 0 {
-            return "\(baseSummary) • \(playingCount) playing"
-        }
-
-        return baseSummary
-    }
-
-    private var breadcrumbParts: [String] {
-        let parts = currentFolder.pathComponents.suffix(3).filter { $0 != "/" }
-        return ["~"] + parts
-    }
+private extension ButtonStyle where Self == LibraryAddButtonStyle {
+    static var libraryAdd: LibraryAddButtonStyle { LibraryAddButtonStyle() }
 }
 
 private struct TrackRow: View {
     let track: AudioAsset
     let isActive: Bool
     let isPlaying: Bool
-    let progress: Double
     let onSelect: () -> Void
     let onTogglePlayback: () -> Void
+    let onDelete: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
-            Button(action: onSelect) {
-                VStack(spacing: 10) {
-                    HStack(spacing: 12) {
-                        Image(systemName: track.icon)
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundStyle(iconColor)
-                            .frame(width: 18)
-
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(track.title)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(Color.ink)
-                                .lineLimit(1)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-
-                            Text(track.metadata)
-                                .font(.system(size: 10, weight: .bold))
-                                .tracking(1)
-                                .foregroundStyle(metadataColor)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-
-                        Spacer(minLength: 0)
-
-                        Button(action: onTogglePlayback) {
-                            Image(systemName: playbackIcon)
-                                .font(.system(size: 26, weight: .medium))
-                                .foregroundStyle(playbackColor)
-                                .contentTransition(.symbolEffect(.replace))
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(!track.canPlay)
-                    }
-
-                    Group {
-                        if isActive || isPlaying {
-                            GeometryReader { proxy in
-                                ZStack(alignment: .leading) {
-                                    Capsule()
-                                        .fill(Color.primaryBlue.opacity(0.12))
-
-                                    Capsule()
-                                        .fill(Color.primaryBlue)
-                                        .frame(width: max(proxy.size.width * progress, 0))
-                                }
-                            }
-                        } else {
-                            Color.clear
-                        }
-                    }
-                    .frame(height: 4)
+            HStack(spacing: 12) {
+                Button(action: onTogglePlayback) {
+                    Image(systemName: playbackIcon)
+                        .font(.system(size: 19, weight: .regular))
+                        .foregroundStyle(playbackColor)
+                        .contentTransition(.symbolEffect(.replace))
+                        .frame(width: 22, height: 22, alignment: .center)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
-                .background(
-                    Rectangle()
-                        .fill(isActive ? Color.primaryBlue.opacity(0.08) : Color.clear)
-                )
-                .contentShape(Rectangle())
+                .buttonStyle(.plain)
+                .disabled(!track.canPlay)
+
+                Button(action: onSelect) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(track.title)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(Color.ink)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Text(track.metadata)
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(metadataColor)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundStyle(Color.subtleInk.opacity(0.45))
+                        .frame(width: 22, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help("从列表移除")
+                .accessibilityLabel("删除")
             }
-            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(Rectangle().fill(rowBackground))
+            .contentShape(Rectangle())
 
             Rectangle()
-                .fill(Color.black.opacity(0.03))
+                .fill(Color.black.opacity(0.06))
                 .frame(height: 0.5)
-                .padding(.leading, 16)
         }
     }
 
-    private var iconColor: Color {
-        isActive ? .primaryBlue : Color.subtleInk.opacity(track.canPlay ? 0.55 : 0.42)
+    private var rowBackground: Color {
+        if isActive {
+            return Color.primaryBlue.opacity(0.04)
+        }
+        return Color.clear
     }
 
     private var metadataColor: Color {
-        Color.subtleInk.opacity(isActive ? 0.65 : 0.42)
+        Color.subtleInk.opacity(isActive ? 0.6 : 0.5)
     }
 
     private var playbackIcon: String {
         if !track.canPlay {
-            return "play.circle.fill"
+            return "play.circle"
         }
-        return isPlaying ? "pause.circle.fill" : "play.circle.fill"
+        return isPlaying ? "pause.circle.fill" : "play.circle"
     }
 
     private var playbackColor: Color {
         if !track.canPlay {
             return Color.subtleInk.opacity(0.28)
         }
-        return isActive || isPlaying ? .primaryBlue : Color.subtleInk.opacity(0.42)
+        return isActive || isPlaying ? .primaryBlue : Color.subtleInk.opacity(0.4)
     }
 }
 
@@ -411,6 +370,11 @@ private final class AudioPlaybackController: ObservableObject {
         for trackID in Array(players.keys) {
             stop(trackID: trackID)
         }
+    }
+
+    func stopPlayback(for track: AudioAsset) {
+        stop(trackID: track.id)
+        progressValues.removeValue(forKey: track.id)
     }
 
     private func startPlayback(for track: AudioAsset, url: URL) {
@@ -501,7 +465,6 @@ private struct AudioAsset: Identifiable {
     let id = UUID()
     let title: String
     let metadata: String
-    let icon: String
     let canPlay: Bool
     let url: URL?
 
@@ -530,7 +493,6 @@ private struct AudioAsset: Identifiable {
                 return AudioAsset(
                     title: url.lastPathComponent,
                     metadata: AudioMetadataFormatter.describe(url: url, fileSize: values.fileSize ?? 0),
-                    icon: "music.note",
                     canPlay: true,
                     url: url
                 )
@@ -543,7 +505,6 @@ private struct AudioAsset: Identifiable {
             AudioAsset(
                 title: folderURL.lastPathComponent,
                 metadata: "NO SUPPORTED AUDIO FILES FOUND",
-                icon: "folder.fill",
                 canPlay: false,
                 url: nil
             )
@@ -582,12 +543,14 @@ private enum AudioMetadataFormatter {
 }
 
 private extension Color {
-    static let primaryBlue = Color(hex: 0x0058BC)
-    static let primaryBlueBright = Color(hex: 0x0070EB)
-    static let ink = Color(hex: 0x1A1C1D)
-    static let subtleInk = Color(hex: 0x6C7281)
+    /// Stitch `audio_list`: primary / links
+    static let primaryBlue = Color(hex: 0x007AFF)
+    static let ink = Color(hex: 0x1C1C1E)
+    static let subtleInk = Color(hex: 0x8E8E93)
     static let surfaceLowest = Color(hex: 0xFFFFFF)
-    static let windowBackground = Color(hex: 0xF9F9FB)
+    static let welcomeIcon = Color(hex: 0x666666)
+    static let startBtnBg = Color(hex: 0xC5D9E8)
+    static let startBtnText = Color(hex: 0x3A76A5)
 
     init(hex: Int, opacity: Double = 1) {
         self.init(
