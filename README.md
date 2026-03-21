@@ -10,27 +10,25 @@
 
 然后选择 `sleep` target，点击 Run 即可。
 
-## 打包（Release）
+## 打包（Release，本地用）
 
-在项目根目录执行：
+在项目根目录执行（会打 **Release**，并生成 **DMG + zip** 到 `dist/`，不含公证）：
 
 ```bash
-xcodebuild -scheme sleep -configuration Release \
-  -destination 'platform=macOS' \
-  -derivedDataPath build/DerivedData build \
-  CODE_SIGN_IDENTITY="-" CODE_SIGNING_ALLOWED=NO
+./scripts/package.sh        # 默认版本号段为 v1
+./scripts/package.sh 1.0.1  # 可传入版本号，文件名会带 v1.0.1-时间戳
 ```
 
-成功后可直接使用的应用位于：
+产物示例：
+
+- `dist/sleep-v1-20260321-xxxx.dmg` — 内含 `sleep.app` 与 **Applications** 快捷方式，拖入即可安装
+- `dist/sleep-v1-20260321-xxxx.zip` — 解压后得到 `sleep.app`
+
+Xcode 直接编译产物路径：
 
 - `build/DerivedData/Build/Products/Release/sleep.app`
 
-也可将 `sleep.app` 复制到任意目录或压缩为 zip 分发。当前仓库已生成一份便于拷贝的产物：
-
-- `dist/sleep.app` — 可直接双击运行（本机构建）
-- `dist/sleep.zip` — 便于分享
-
-说明：上述命令关闭了代码签名，适合本机或内网使用。若需对外分发并减少「已损坏」提示，请在 Xcode 中配置 **Signing & Capabilities**（Apple Developer 账号），再用 Archive 导出已签名的 app。
+说明：适合本机使用；若首次打开被拦截，可在 **系统设置 → 隐私与安全性** 里点「仍要打开」，或在 app 上右键 **打开**。
 
 ## 代码位置
 
