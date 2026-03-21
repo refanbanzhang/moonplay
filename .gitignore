@@ -30,6 +30,9 @@ Carthage/Build/
 # 本项目：自定义 DerivedData / 本地构建目录
 .local-derived/
 
+# 本地打好的可分发包（按需保留，一般不提交）
+dist/
+
 # 工具与临时文件
 *.swp
 *~
