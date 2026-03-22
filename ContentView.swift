@@ -417,9 +417,14 @@ private final class AudioPlaybackController: ObservableObject {
         ) { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.progressValues[trackID] = 1
-                self.playingTrackIDs.remove(trackID)
-                self.players[trackID]?.seek(to: .zero)
+                guard let player = self.players[trackID] else { return }
+                self.progressValues[trackID] = 0
+                self.playingTrackIDs.insert(trackID)
+                player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] finished in
+                    guard finished, let self else { return }
+                    guard self.playingTrackIDs.contains(trackID) else { return }
+                    player.play()
+                }
             }
         }
     }
