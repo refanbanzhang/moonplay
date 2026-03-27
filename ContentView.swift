@@ -40,17 +40,7 @@ struct ContentView: View {
     }
 
     private func importFolder() {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.prompt = "Import"
-        panel.message = "Choose a folder containing audio files."
-
-        guard panel.runModal() == .OK, let selectedURL = panel.url else {
-            return
-        }
-
+        let selectedURL = AppPaths.defaultAudioFolder
         let importedTracks = AudioAsset.load(from: selectedURL)
         let nextTracks = importedTracks.isEmpty ? AudioAsset.placeholder(for: selectedURL) : importedTracks
         playback.stop()
@@ -76,6 +66,10 @@ struct ContentView: View {
 private enum ScreenStage: Equatable {
     case welcome
     case library(folder: URL)
+}
+
+private enum AppPaths {
+    static let defaultAudioFolder = URL(fileURLWithPath: "/Users/rfbz/Desktop/music", isDirectory: true)
 }
 
 private struct WelcomeScreen: View {
