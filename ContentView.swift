@@ -160,6 +160,7 @@ private struct LibraryScreen: View {
                             progress: playback.progress(for: track),
                             currentTime: playback.currentTime(for: track),
                             duration: playback.duration(for: track),
+                            volume: playback.volume(for: track),
                             showsProgress: playback.hasPlaybackState(for: track),
                             canSeek: playback.canSeek(track),
                             onSelect: {
@@ -171,6 +172,9 @@ private struct LibraryScreen: View {
                             },
                             onSeek: { progress in
                                 playback.seek(to: progress, for: track)
+                            },
+                            onVolumeChange: { volume in
+                                playback.setVolume(volume, for: track)
                             },
                             onDelete: {
                                 onDeleteTrack(track)
@@ -248,15 +252,18 @@ private struct TrackRow: View {
     let progress: Double
     let currentTime: Double
     let duration: Double
+    let volume: Double
     let showsProgress: Bool
     let canSeek: Bool
     let onSelect: () -> Void
     let onTogglePlayback: () -> Void
     let onSeek: (Double) -> Void
+    let onVolumeChange: (Double) -> Void
     let onDelete: () -> Void
 
     @State private var scrubProgress: Double = 0
     @State private var isScrubbing = false
+    @State private var showsVolumeSlider = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -314,19 +321,52 @@ private struct TrackRow: View {
                             .foregroundStyle(Color.subtleInk.opacity(0.72))
                         }
                     }
+
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                Button(action: onDelete) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundStyle(Color.subtleInk.opacity(0.45))
-                        .frame(width: 22, height: 22)
-                        .contentShape(Rectangle())
+                HStack(alignment: .top, spacing: 8) {
+                    VStack(spacing: 6) {
+                        Button(action: {
+                            guard track.canPlay else { return }
+                            withAnimation(.easeOut(duration: 0.18)) {
+                                showsVolumeSlider.toggle()
+                            }
+                        }) {
+                            Image(systemName: volumeIcon)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(Color.subtleInk.opacity(track.canPlay ? 0.72 : 0.36))
+                                .frame(width: 22, height: 22)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(!track.canPlay)
+                        .popover(isPresented: $showsVolumeSlider, arrowEdge: .top) {
+                            VStack(spacing: 6) {
+                                VerticalSlider(value: volumeBinding)
+                                    .frame(width: 22, height: 120)
+
+                                Text(volumeLabel)
+                                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+                                    .foregroundStyle(Color.subtleInk.opacity(0.72))
+                            }
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 8)
+                            .frame(width: 52)
+                        }
+                    }
+
+                    Button(action: onDelete) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundStyle(Color.subtleInk.opacity(0.45))
+                            .frame(width: 22, height: 22)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .help("从列表移除")
+                    .accessibilityLabel("删除")
                 }
-                .buttonStyle(.plain)
-                .help("从列表移除")
-                .accessibilityLabel("删除")
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -385,6 +425,30 @@ private struct TrackRow: View {
         )
     }
 
+    private var volumeBinding: Binding<Double> {
+        Binding(
+            get: { volume },
+            set: { newValue in
+                onVolumeChange(min(max(newValue, 0), 1))
+            }
+        )
+    }
+
+    private var volumeIcon: String {
+        switch volume {
+        case 0:
+            return "speaker.slash.fill"
+        case ..<0.4:
+            return "speaker.wave.1.fill"
+        default:
+            return "speaker.wave.2.fill"
+        }
+    }
+
+    private var volumeLabel: String {
+        "\(Int((volume * 100).rounded()))%"
+    }
+
     private var displayedElapsedTime: Double {
         if isScrubbing {
             return duration * scrubProgress
@@ -419,16 +483,58 @@ private struct TrackRow: View {
     }
 }
 
+private struct VerticalSlider: View {
+    @Binding var value: Double
+
+    var body: some View {
+        GeometryReader { geometry in
+            let trackWidth: CGFloat = 4
+            let knobSize: CGFloat = 12
+            let availableHeight = max(geometry.size.height - knobSize, 1)
+            let clampedValue = min(max(value, 0), 1)
+            let knobOffset = availableHeight * CGFloat(1 - clampedValue)
+
+            ZStack(alignment: .top) {
+                Capsule()
+                    .fill(Color.black.opacity(0.08))
+                    .frame(width: trackWidth)
+
+                Capsule()
+                    .fill(Color.primaryBlue)
+                    .frame(width: trackWidth, height: max((1 - knobOffset / availableHeight) * availableHeight + knobSize / 2, knobSize / 2))
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+
+                Circle()
+                    .fill(Color.primaryBlue)
+                    .frame(width: knobSize, height: knobSize)
+                    .offset(y: knobOffset)
+                    .shadow(color: Color.black.opacity(0.14), radius: 1, y: 1)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { gesture in
+                        let location = min(max(gesture.location.y - knobSize / 2, 0), availableHeight)
+                        value = Double(1 - location / availableHeight)
+                    }
+            )
+        }
+    }
+}
+
 @MainActor
 private final class AudioPlaybackController: ObservableObject {
     @Published private(set) var playingTrackIDs: Set<UUID> = []
     @Published private(set) var progressValues: [UUID: Double] = [:]
     @Published private(set) var currentTimes: [UUID: Double] = [:]
     @Published private(set) var durations: [UUID: Double] = [:]
+    @Published private(set) var volumeValues: [UUID: Double] = [:]
 
     private var players: [UUID: AVPlayer] = [:]
     private var timeObservers: [UUID: Any] = [:]
     private var endObservers: [UUID: NSObjectProtocol] = [:]
+    private var pendingSeekTimes: [UUID: Double] = [:]
 
     var playingTrackCount: Int {
         playingTrackIDs.count
@@ -464,6 +570,10 @@ private final class AudioPlaybackController: ObservableObject {
         durations[track.id] ?? 0
     }
 
+    func volume(for track: AudioAsset) -> Double {
+        volumeValues[track.id] ?? 1
+    }
+
     func hasPlaybackState(for track: AudioAsset) -> Bool {
         players[track.id] != nil
     }
@@ -488,11 +598,14 @@ private final class AudioPlaybackController: ObservableObject {
         let targetSeconds = duration * clampedProgress
         currentTimes[track.id] = targetSeconds
         progressValues[track.id] = clampedProgress
-        player.seek(
-            to: CMTime(seconds: targetSeconds, preferredTimescale: 600),
-            toleranceBefore: .zero,
-            toleranceAfter: .zero
-        )
+        pendingSeekTimes[track.id] = targetSeconds
+        seekPlayer(player, trackID: track.id, to: targetSeconds)
+    }
+
+    func setVolume(_ volume: Double, for track: AudioAsset) {
+        let clampedVolume = Float(min(max(volume, 0), 1))
+        volumeValues[track.id] = Double(clampedVolume)
+        players[track.id]?.volume = clampedVolume
     }
 
     func isPlaying(_ track: AudioAsset) -> Bool {
@@ -512,17 +625,42 @@ private final class AudioPlaybackController: ObservableObject {
     private func startPlayback(for track: AudioAsset, url: URL) {
         let item = AVPlayerItem(url: url)
         let player = AVPlayer(playerItem: item)
+        player.volume = Float(volume(for: track))
         players[track.id] = player
+        attachObservers(for: player, item: item, trackID: track.id)
+        playingTrackIDs.insert(track.id)
+
+        let startTime = pendingSeekTimes[track.id] ?? currentTimes[track.id] ?? 0
+        if startTime > 0 {
+            pendingSeekTimes[track.id] = startTime
+            seekPlayer(player, trackID: track.id, to: startTime) { [weak self] in
+                guard let self else { return }
+                guard self.playingTrackIDs.contains(track.id) else { return }
+                player.play()
+            }
+            return
+        }
+
         progressValues[track.id] = 0
         currentTimes[track.id] = 0
-        attachObservers(for: player, item: item, trackID: track.id)
         player.play()
-        playingTrackIDs.insert(track.id)
     }
 
     private func resume(player: AVPlayer, trackID: UUID) {
-        player.play()
+        let resumeTime = pendingSeekTimes[trackID] ?? currentTimes[trackID] ?? 0
+        guard resumeTime > 0 else {
+            player.play()
+            playingTrackIDs.insert(trackID)
+            return
+        }
+
         playingTrackIDs.insert(trackID)
+        pendingSeekTimes[trackID] = resumeTime
+        seekPlayer(player, trackID: trackID, to: resumeTime) { [weak self] in
+            guard let self else { return }
+            guard self.playingTrackIDs.contains(trackID) else { return }
+            player.play()
+        }
     }
 
     private func pause(trackID: UUID) {
@@ -539,6 +677,13 @@ private final class AudioPlaybackController: ObservableObject {
                 guard let self else { return }
                 let duration = item.duration.seconds
                 guard duration.isFinite, duration > 0 else { return }
+                if let pendingSeekTime = self.pendingSeekTimes[trackID] {
+                    let delta = abs(currentTime.seconds - pendingSeekTime)
+                    if delta > 0.12 {
+                        return
+                    }
+                    self.pendingSeekTimes.removeValue(forKey: trackID)
+                }
                 self.durations[trackID] = duration
                 self.currentTimes[trackID] = currentTime.seconds
                 self.progressValues[trackID] = min(max(currentTime.seconds / duration, 0), 1)
@@ -553,6 +698,7 @@ private final class AudioPlaybackController: ObservableObject {
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 guard let player = self.players[trackID] else { return }
+                self.pendingSeekTimes.removeValue(forKey: trackID)
                 self.currentTimes[trackID] = 0
                 self.progressValues[trackID] = 0
                 self.playingTrackIDs.insert(trackID)
@@ -588,6 +734,31 @@ private final class AudioPlaybackController: ObservableObject {
         progressValues.removeValue(forKey: trackID)
         currentTimes.removeValue(forKey: trackID)
         durations.removeValue(forKey: trackID)
+        volumeValues.removeValue(forKey: trackID)
+        pendingSeekTimes.removeValue(forKey: trackID)
+    }
+
+    private func seekPlayer(
+        _ player: AVPlayer,
+        trackID: UUID,
+        to seconds: Double,
+        completion: (() -> Void)? = nil
+    ) {
+        player.seek(
+            to: CMTime(seconds: seconds, preferredTimescale: 600),
+            toleranceBefore: .zero,
+            toleranceAfter: .zero
+        ) { [weak self] finished in
+            guard finished else { return }
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                guard self.pendingSeekTimes[trackID] == nil || abs((self.pendingSeekTimes[trackID] ?? seconds) - seconds) < 0.001 else {
+                    return
+                }
+                self.pendingSeekTimes.removeValue(forKey: trackID)
+                completion?()
+            }
+        }
     }
 
     deinit {
