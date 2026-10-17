@@ -6,7 +6,7 @@ enum AppWindow {
 }
 
 @main
-struct SleepApp: App {
+struct MoonplayApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

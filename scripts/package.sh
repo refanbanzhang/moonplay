@@ -4,10 +4,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-SCHEME="sleep"
+SCHEME="Moonplay"
 CONFIG="Release"
 DERIVED="${ROOT}/build/DerivedData"
-APP="${DERIVED}/Build/Products/Release/sleep.app"
+APP="${DERIVED}/Build/Products/Release/Moonplay.app"
 DIST="${ROOT}/dist"
 VERSION="${1:-1}"
 
@@ -27,9 +27,9 @@ if [[ ! -d "${APP}" ]]; then
 fi
 
 STAMP="$(date +%Y%m%d-%H%M)"
-BASENAME="sleep-v${VERSION}-${STAMP}"
+BASENAME="Moonplay-v${VERSION}-${STAMP}"
 
-STAGE="$(mktemp -d /tmp/sleeppkg.XXXXXX)"
+STAGE="$(mktemp -d /tmp/moonplaypkg.XXXXXX)"
 cleanup() { rm -rf "${STAGE}"; }
 trap cleanup EXIT
 
@@ -42,7 +42,7 @@ ZIP="${DIST}/${BASENAME}.zip"
 echo "==> DMG -> ${DMG}"
 rm -f "${DMG}"
 hdiutil create \
-  -volname "sleep" \
+  -volname "Moonplay" \
   -srcfolder "${STAGE}" \
   -ov \
   -format UDZO \

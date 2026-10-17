@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A00000000000000000000001 /* SleepApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000011 /* SleepApp.swift */; };
+		A00000000000000000000001 /* MoonplayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000011 /* MoonplayApp.swift */; };
 		A00000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000012 /* ContentView.swift */; };
 		A00000000000000000000026 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000027 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A0000000000000000000000A /* sleep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = sleep.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A00000000000000000000011 /* SleepApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepApp.swift; sourceTree = "<group>"; };
+		A0000000000000000000000A /* Moonplay.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Moonplay.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00000000000000000000011 /* MoonplayApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonplayApp.swift; sourceTree = "<group>"; };
 		A00000000000000000000012 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A00000000000000000000013 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A00000000000000000000027 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -34,7 +34,7 @@
 		A00000000000000000000005 = {
 			isa = PBXGroup;
 			children = (
-				A00000000000000000000011 /* SleepApp.swift */,
+				A00000000000000000000011 /* MoonplayApp.swift */,
 				A00000000000000000000012 /* ContentView.swift */,
 				A00000000000000000000013 /* Info.plist */,
 				A00000000000000000000027 /* Assets.xcassets */,
@@ -45,7 +45,7 @@
 		A00000000000000000000009 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A0000000000000000000000A /* sleep.app */,
+				A0000000000000000000000A /* Moonplay.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -53,9 +53,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A00000000000000000000003 /* sleep */ = {
+		A00000000000000000000003 /* Moonplay */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A00000000000000000000023 /* Build configuration list for PBXNativeTarget "sleep" */;
+			buildConfigurationList = A00000000000000000000023 /* Build configuration list for PBXNativeTarget "Moonplay" */;
 			buildPhases = (
 				A00000000000000000000007 /* Sources */,
 				A00000000000000000000004 /* Frameworks */,
@@ -65,9 +65,9 @@
 			);
 			dependencies = (
 			);
-			name = sleep;
-			productName = sleep;
-			productReference = A0000000000000000000000A /* sleep.app */;
+			name = Moonplay;
+			productName = Moonplay;
+			productReference = A0000000000000000000000A /* Moonplay.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A00000000000000000000020 /* Build configuration list for PBXProject "sleep" */;
+			buildConfigurationList = A00000000000000000000020 /* Build configuration list for PBXProject "Moonplay" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -98,7 +98,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A00000000000000000000003 /* sleep */,
+				A00000000000000000000003 /* Moonplay */,
 			);
 		};
 /* End PBXProject section */
@@ -120,7 +120,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00000000000000000000002 /* ContentView.swift in Sources */,
-				A00000000000000000000001 /* SleepApp.swift in Sources */,
+				A00000000000000000000001 /* MoonplayApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,7 +174,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sleep.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.moonplay.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -195,7 +195,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sleep.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.moonplay.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -205,7 +205,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A00000000000000000000020 /* Build configuration list for PBXProject "sleep" */ = {
+		A00000000000000000000020 /* Build configuration list for PBXProject "Moonplay" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A00000000000000000000021 /* Debug */,
@@ -214,7 +214,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A00000000000000000000023 /* Build configuration list for PBXNativeTarget "sleep" */ = {
+		A00000000000000000000023 /* Build configuration list for PBXNativeTarget "Moonplay" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A00000000000000000000024 /* Debug */,
