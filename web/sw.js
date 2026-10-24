@@ -1,5 +1,5 @@
 // 与 index.html 里的 ?v= 保持一致
-const VERSION = "8";
+const VERSION = "10";
 const CACHE_NAME = `moonplay-shell-v${VERSION}`;
 const SHELL_FILES = [
   "./",
@@ -7,7 +7,8 @@ const SHELL_FILES = [
   `./styles.css?v=${VERSION}`,
   `./app.js?v=${VERSION}`,
   "./manifest.webmanifest",
-  "./icon.svg",
+  `./icon-32.png?v=${VERSION}`,
+  `./icon-512.png?v=${VERSION}`,
 ];
 
 self.addEventListener("install", (event) => {

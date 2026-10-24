@@ -7,9 +7,11 @@
   <meta name="theme-color" content="#ffffff">
   <meta name="description" content="在浏览器中播放本地音频文件">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="icon" href="./icon-32.png?v=10" type="image/png" sizes="32x32">
+  <link rel="icon" href="./icon-512.png?v=10" type="image/png" sizes="512x512">
+  <link rel="apple-touch-icon" href="./icon-512.png?v=10">
   <title>Moonplay</title>
-  <link rel="stylesheet" href="./styles.css?v=8">
+  <link rel="stylesheet" href="./styles.css?v=10">
 </head>
 <body>
   <main class="app" aria-live="polite">
@@ -47,7 +49,7 @@
       </label>
     </form>
   </dialog>
-  <script type="module" src="./app.js?v=8"></script>
+  <script type="module" src="./app.js?v=10"></script>
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./sw.js", {
