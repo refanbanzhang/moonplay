@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Moonplay</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app" aria-live="polite">
+    <section class="welcome" data-screen="welcome">
+      <div class="welcome-content">
+        <div class="folder-icon" aria-hidden="true">⌁</div>
+        <h1>AudioDirectory</h1>
+        <p>选择一个包含音频文件的文件夹开始播放。</p>
+        <button class="start-button" type="button" data-action="choose-folder">./START</button>
+        <input class="folder-input" data-folder-input type="file" webkitdirectory directory multiple accept="audio/*" tabindex="-1" aria-hidden="true">
+      </div>
+    </section>
+
+    <section class="library is-hidden" data-screen="library">
+      <header class="library-header">
+        <div class="breadcrumb" title="当前音频目录">
+          <span class="breadcrumb-muted">./</span>
+          <span class="breadcrumb-main">Audio</span>
+          <span class="breadcrumb-muted">./</span>
+          <span class="breadcrumb-folder" data-folder-name>未命名目录</span>
+        </div>
+        <button class="icon-button" type="button" data-action="choose-folder" aria-label="选择其他文件夹" title="选择其他文件夹">+</button>
+      </header>
+      <div class="track-list" data-track-list></div>
+    </section>
+
+    <p class="error-message is-hidden" data-error role="alert"></p>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

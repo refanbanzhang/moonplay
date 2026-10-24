@@ -35,3 +35,13 @@ Xcode 直接编译产物路径：
 - `MoonplayApp.swift`
 - `ContentView.swift`
 - `Info.plist`
+
+## 网页版 Dock 快捷启动
+
+安装一个可以放进 Dock 的网页版启动器：
+
+```bash
+./scripts/install-dock-launcher.sh
+```
+
+脚本会创建 `~/Applications/Moonplay Web.app` 并自动打开它。将这个 App 拖到 Dock 后，之后点击 Dock 图标即可启动网页版。
