@@ -36,6 +36,19 @@ const stopToggle = document.querySelector("[data-stop-on]");
 const stopTimeInput = document.querySelector("[data-stop-time]");
 const stopNote = document.querySelector("[data-stop-note]");
 const LOG_PREFIX = "[Moonplay]";
+const missing = [
+  ["musicInput", musicInput],
+  ["trackList", trackList],
+  ["statusMessage", statusMessage],
+  ["errorMessage", errorMessage],
+  ["settingsDialog", settingsDialog],
+  ["stopToggle", stopToggle],
+  ["stopTimeInput", stopTimeInput],
+  ["stopNote", stopNote],
+].flatMap(([name, node]) => (node ? [] : [name]));
+
+console.info(LOG_PREFIX, "启动", { script: import.meta.url, missing });
+if (missing.length) throw new Error(`页面节点缺失: ${missing.join(", ")}`);
 
 document.addEventListener("click", (event) => {
   const action = event.target.closest("[data-action]")?.dataset.action;
