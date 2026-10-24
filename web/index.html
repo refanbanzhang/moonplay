@@ -4,36 +4,59 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="在浏览器中播放本地音频文件">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <title>Moonplay</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <main class="app" aria-live="polite">
-    <section class="welcome" data-screen="welcome">
-      <div class="welcome-content">
-        <div class="folder-icon" aria-hidden="true">⌁</div>
-        <h1>AudioDirectory</h1>
-        <p>选择一个包含音频文件的文件夹开始播放。</p>
-        <button class="start-button" type="button" data-action="choose-folder">./START</button>
-        <input class="folder-input" data-folder-input type="file" webkitdirectory directory multiple accept="audio/*" tabindex="-1" aria-hidden="true">
-      </div>
-    </section>
-
-    <section class="library is-hidden" data-screen="library">
+    <section class="library">
       <header class="library-header">
-        <div class="breadcrumb" title="当前音频目录">
-          <span class="breadcrumb-muted">./</span>
-          <span class="breadcrumb-main">Audio</span>
-          <span class="breadcrumb-muted">./</span>
-          <span class="breadcrumb-folder" data-folder-name>未命名目录</span>
+        <p class="stop-note is-hidden" data-stop-note></p>
+        <div class="hdr-actions">
+          <button class="icon-button" type="button" data-action="settings" aria-label="设置" title="设置"></button>
+          <button class="icon-button" type="button" data-action="choose-music" aria-label="选择更多音乐" title="选择更多音乐">＋</button>
         </div>
-        <button class="icon-button" type="button" data-action="choose-folder" aria-label="选择其他文件夹" title="选择其他文件夹">+</button>
       </header>
       <div class="track-list" data-track-list></div>
+      <input class="music-input" data-music-input type="file" multiple accept="audio/*" tabindex="-1" aria-hidden="true">
     </section>
 
+    <p class="status-message is-hidden" data-status role="status"></p>
     <p class="error-message is-hidden" data-error role="alert"></p>
   </main>
+  <dialog class="sheet" data-settings>
+    <form class="sheet-form" method="dialog">
+      <div class="sheet-head">
+        <h2 class="sheet-title">设置</h2>
+        <button class="text-btn" type="submit">完成</button>
+      </div>
+      <div class="set-row">
+        <div class="set-copy">
+          <span class="set-name">自动停止</span>
+          <span class="set-hint">到点暂停所有正在播放的音乐</span>
+        </div>
+        <input class="switch" data-stop-on type="checkbox" role="switch" aria-label="自动停止">
+      </div>
+      <label class="set-row">
+        <span class="set-name">停止时间</span>
+        <input class="time-input" data-stop-time type="time" required>
+      </label>
+    </form>
+  </dialog>
   <script type="module" src="./app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js", {
+        scope: "./",
+        updateViaCache: "none",
+      }).catch((error) => {
+        console.warn("[Moonplay] Service Worker 注册失败", error);
+      });
+    }
+  </script>
 </body>
 </html>
