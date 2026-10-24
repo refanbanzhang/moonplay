@@ -91,7 +91,21 @@ stopTimeInput.addEventListener("change", () => {
 });
 
 document.addEventListener("visibilitychange", () => {
+  console.info(LOG_PREFIX, "页面可见性变化", {
+    visibilityState: document.visibilityState,
+    hidden: document.hidden,
+    activeTracks: state.tracks.filter((track) => !track.audio.paused).map((track) => track.title),
+    audioContext: state.audioContext?.state || "未创建",
+  });
   if (document.visibilityState === "visible") syncStop();
+});
+
+window.addEventListener("pagehide", (event) => {
+  console.info(LOG_PREFIX, "页面隐藏", {
+    persisted: event.persisted,
+    activeTracks: state.tracks.filter((track) => !track.audio.paused).map((track) => track.title),
+    audioContext: state.audioContext?.state || "未创建",
+  });
 });
 
 musicInput.addEventListener("change", async (event) => {
@@ -256,6 +270,41 @@ function createTrack(file) {
   });
   audio.addEventListener("pause", () => {
     updateTrackRow(track);
+    console.info(LOG_PREFIX, "音频暂停", {
+      track: track.title,
+      currentTime: Number(track.audio.currentTime.toFixed(2)),
+      readyState: track.audio.readyState,
+      networkState: track.audio.networkState,
+      visibilityState: document.visibilityState,
+      audioContext: state.audioContext?.state || "未创建",
+    });
+  });
+  audio.addEventListener("waiting", () => {
+    console.warn(LOG_PREFIX, "音频等待数据", {
+      track: track.title,
+      currentTime: Number(track.audio.currentTime.toFixed(2)),
+      readyState: track.audio.readyState,
+      networkState: track.audio.networkState,
+      visibilityState: document.visibilityState,
+    });
+  });
+  audio.addEventListener("stalled", () => {
+    console.warn(LOG_PREFIX, "音频加载停滞", {
+      track: track.title,
+      currentTime: Number(track.audio.currentTime.toFixed(2)),
+      readyState: track.audio.readyState,
+      networkState: track.audio.networkState,
+      visibilityState: document.visibilityState,
+    });
+  });
+  audio.addEventListener("error", () => {
+    console.error(LOG_PREFIX, "音频错误", {
+      track: track.title,
+      mediaError: track.audio.error?.code || null,
+      message: track.audio.error?.message || "",
+      currentTime: Number(track.audio.currentTime.toFixed(2)),
+      visibilityState: document.visibilityState,
+    });
   });
   audio.addEventListener("ended", () => updateTrackRow(track));
 
@@ -425,6 +474,13 @@ function ensureAudioContext() {
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   if (!AudioContextClass) return null;
   state.audioContext = new AudioContextClass();
+  state.audioContext.addEventListener("statechange", () => {
+    console.info(LOG_PREFIX, "Web Audio 状态变化", {
+      state: state.audioContext?.state,
+      visibilityState: document.visibilityState,
+      activeTracks: state.tracks.filter((track) => !track.audio.paused).map((track) => track.title),
+    });
+  });
   return state.audioContext;
 }
 
